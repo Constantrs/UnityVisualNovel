@@ -1,10 +1,13 @@
 using UnityEngine;
 using TMPro;
 
-[System.Serializable]
-public class DialogueContainer
+namespace Dialogue
 {
-    public GameObject root;
-    public TextMeshProUGUI nameText;
-    public TextMeshProUGUI dialogueText;
+    [System.Serializable]
+    public class DialogueContainer
+    {
+        public GameObject root;
+        public TextMeshProUGUI nameText;
+        public TextMeshProUGUI dialogueText;
+    }
 }

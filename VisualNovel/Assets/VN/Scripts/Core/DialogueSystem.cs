@@ -3,32 +3,35 @@ using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
 
-public class DialogueSystem : MonoBehaviour
+namespace Dialogue
 {
-    [SerializeField] private DialogueContainer dialogueContainer = new DialogueContainer();
-
-    public static DialogueSystem instance { get; private set; }
-
-    private void Awake()
+    public class DialogueSystem : MonoBehaviour
     {
-        if (instance == null)
+        [SerializeField] private DialogueContainer dialogueContainer = new DialogueContainer();
+
+        public static DialogueSystem instance { get; private set; }
+
+        private void Awake()
         {
-            instance = this;
+            if (instance == null)
+            {
+                instance = this;
+            }
+            else
+            {
+                //
+            }
         }
-        else 
+
+        public DialogueContainer GetContainer()
         {
-            //
+            return dialogueContainer;
         }
-    }
 
-    public DialogueContainer GetContainer()
-    {
-        return dialogueContainer;
-    }
+        // Update is called once per frame
+        void Update()
+        {
 
-    // Update is called once per frame
-    void Update()
-    {
-        
+        }
     }
 }
