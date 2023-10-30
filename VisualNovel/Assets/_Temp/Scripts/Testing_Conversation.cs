@@ -25,21 +25,6 @@ namespace Testing
         {
             List<string> lines = FileManager.ReadTextAsset(textAsset);
 
-            //foreach (string line in lines) 
-            //{
-            //    if (string.IsNullOrEmpty(line)) continue;
-
-            //    Debug.Log($"Segmenting Line '{line}'");
-            //    DIALOGUE_LINE dlline = DialogueAnalyzer.Analyze(line); 
-
-            //    int i = 0;
-            //    foreach(DIALOGUE_DATA.DIALOGUE_SEGMENT segment in dlline.dialogue.segments)
-            //    {
-            //        Debug.Log($"Segment [{i++}] = '{segment.dialogue}'  [singal = {segment.startSignal.ToString()}{ (segment.signalDelay > 0 ? $"{segment.signalDelay}" : $"")}]");
-            //    }
-
-            //}
-
             DialogueSystem.instance.Say(lines);
         }
     }

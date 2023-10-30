@@ -69,21 +69,21 @@ namespace Dialogue
         {
             if (line.hasSpeaker)
             {
-                dialogueSystem.ShowSpeakerName(line.speaker.displayName);
+                dialogueSystem.ShowSpeakerName(line.speakerData.displayName);
             }
             //else
             //{
             //    dialogueSystem.HideSpearkerName();
             //}
 
-            yield return CoBuildLineSegmengs(line.dialogue);
+            yield return CoBuildLineSegmengs(line.dialogueData);
 
             yield return CoWaitForUserInput();
         }
 
         IEnumerator CoLine_RunCommands(DIALOGUE_LINE line)
         {
-            Debug.Log(line.commands);
+            Debug.Log(line.commandsData);
             yield return null;
         }
 
