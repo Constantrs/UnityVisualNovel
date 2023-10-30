@@ -61,6 +61,11 @@ namespace Dialogue
                     yield return CoLine_RunCommands(line);
                 }
 
+                if(line.hasDialogue)
+                {
+                    yield return CoWaitForUserInput();
+                }
+
                 //yield return new WaitForSeconds(1);
             }
         }
@@ -77,13 +82,24 @@ namespace Dialogue
             //}
 
             yield return CoBuildLineSegmengs(line.dialogueData);
-
-            yield return CoWaitForUserInput();
         }
 
         IEnumerator CoLine_RunCommands(DIALOGUE_LINE line)
         {
-            Debug.Log(line.commandsData);
+            List<COMMAND_DATA.Command> commands = line.commandsData.commands;
+
+            foreach (COMMAND_DATA.Command command in commands)
+            {
+                if(command.waitForCompletion)
+                {
+                    yield return CommandManager.instance.Exetute(command.name, command.arguments);
+                }
+                else
+                {
+                    CommandManager.instance.Exetute(command.name, command.arguments);
+                }
+            }
+
             yield return null;
         }
 

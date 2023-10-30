@@ -13,6 +13,7 @@ namespace Dialogue
     {
         private const char COMMANDSPLITTER_ID = ',';
         private const char ARGUMENTSCONTAINER_ID = '(';
+        private const string WAITCOMMAND_ID = "[wait]";
 
         public List<Command> commands = new List<Command>();
 
@@ -21,6 +22,7 @@ namespace Dialogue
         {
             public string name;
             public string[] arguments;
+            public bool waitForCompletion;
         }
         public COMMAND_DATA(string rawCommands)
         {
@@ -37,6 +39,17 @@ namespace Dialogue
                 Command command = new Command();
                 int index = cmd.IndexOf(ARGUMENTSCONTAINER_ID);
                 command.name = cmd.Substring(0, index).Trim();
+
+                if(command.name.ToLower().StartsWith(WAITCOMMAND_ID)) 
+                {
+                    command.name = command.name.Substring(WAITCOMMAND_ID.Length);
+                    command.waitForCompletion = true;
+                }
+                else
+                {
+                    command.waitForCompletion = false;
+                }
+
                 command.arguments = GetArgs(cmd.Substring(index + 1, cmd.Length - index - 2));
                 result.Add(command);
             }
@@ -65,7 +78,7 @@ namespace Dialogue
                     continue;
                 }
 
-                currentArg.Append(args);
+                currentArg.Append(args[i]);
             }
 
             if(currentArg.Length > 0)

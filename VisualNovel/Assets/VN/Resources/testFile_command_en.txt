@@ -1,7 +1,9 @@
-UnityChanA "Let`s play some music!" playSong("Funky Beats!", -v 0.75 -p l), setMood(chill)
+print_lp("commands test start")
 
-UnityChanB "You have odd taste in music" playVoice("e_dl_v2", -v 1.5), setBackGround(Rooml -t "Diagonal Lines" -s 3.5)
+UnityChan "Move left and turn off the right" [wait]moveCharTest(left), flipCharTest(), [wait]moveCharTest(right)
 
-setAccomplishment("A legendary Boombox" true), setCLI("UnityChan 0:Angel 1:Intrigued -s 2.3 -l true")
+UnityChan "Nice" flipCharTest()
 
-showScene(false), stopMusic(all -s 1.5)
+System "-- The End --"
+
+print_lp("commands test end")

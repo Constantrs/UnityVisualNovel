@@ -7,7 +7,7 @@ namespace Dialogue
 {
     public class DialogueAnalyzer : MonoBehaviour
     {
-        private const string commandRegexPattern = @"\w*[^\s]\(";
+        private const string commandRegexPattern = @"[\w[\]]*[^\s]\(";
 
         public static DIALOGUE_LINE Analyze(string rawline)
         {
@@ -54,18 +54,24 @@ namespace Dialogue
             }
 
             Regex commandRegex = new Regex(commandRegexPattern);
-            Match match = commandRegex.Match(rawline);
+            MatchCollection matches = commandRegex.Matches(rawline);
             int commandStart = -1;
-            if (match.Success)
+            
+            foreach (Match match in matches) 
             {
-                commandStart = match.Index;
-                if (dialogueStart == -1 && dialogueEnd == -1)
+                if(match.Index < dialogueStart || match.Index > dialogueEnd) 
                 {
-                    return ("", "", rawline.Trim());
+                    commandStart = match.Index;
+                    break;
                 }
             }
 
-            if(dialogueStart != -1 && dialogueEnd != -1 && (commandStart == -1 || commandStart > dialogueEnd))
+            if (commandStart == -1 && (dialogueStart == -1 && dialogueEnd == -1))
+            {
+                return ("", "", rawline.Trim());
+            }
+
+            if (dialogueStart != -1 && dialogueEnd != -1 && (commandStart == -1 || commandStart > dialogueEnd))
             {
                 speaker = rawline.Substring(0, dialogueStart).Trim();
                 dialogue = rawline.Substring(dialogueStart + 1, dialogueEnd - dialogueStart - 1).Replace("\\\"", "\"");
