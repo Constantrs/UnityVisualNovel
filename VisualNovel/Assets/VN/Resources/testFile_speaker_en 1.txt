@@ -1,0 +1,7 @@
+UnityChan as ??? "hello here."
+
+UnityChan as ??? at 1:0 "hello here."
+
+UnityChan at 0.5:0.5 as The Girl "hello here."
+
+UnityChan as ??? [0:angle 1:happy] at 0 "hello here."

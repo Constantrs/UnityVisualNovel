@@ -69,7 +69,7 @@ namespace Dialogue
         {
             if (line.hasSpeaker)
             {
-                dialogueSystem.ShowSpeakerName(line.speaker);
+                dialogueSystem.ShowSpeakerName(line.speaker.displayName);
             }
             //else
             //{

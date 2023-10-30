@@ -7,7 +7,7 @@ namespace Dialogue
 {
     public class DialogueAnalyzer : MonoBehaviour
     {
-        private const string commandRegexPattern = "\\w*[^\\s]\\(";
+        private const string commandRegexPattern = @"\w*[^\s]\(";
 
         public static DIALOGUE_LINE Analyze(string rawline)
         {
