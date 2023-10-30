@@ -11,6 +11,10 @@ namespace Dialogue
         public string dialogue;
         public string commands;
 
+        public bool hasSpeaker => speaker != null;
+        public bool hasDialogue => dialogue != null;
+        public bool hasCommands => commands != null;
+
         public DIALOGUE_LINE(string speaker, string dialogue, string commands)
         {
             this.speaker = speaker;
