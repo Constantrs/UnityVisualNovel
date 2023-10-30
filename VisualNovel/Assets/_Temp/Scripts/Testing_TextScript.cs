@@ -11,9 +11,6 @@ namespace Testing
         // Start is called before the first frame update
         void Start()
         {
-            //string line = "UnityChan \"Dialogue \\\"Goes In\\\" Here!\" Command(arugment here)";
-            //DialogueAnalyzer.Analyze(line);
-
             SendFileToAnalyze();
         }
 

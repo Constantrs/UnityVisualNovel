@@ -1,0 +1,4 @@
+UnityChanA "dialogue here."
+UnityChanB "This changes eyerythings.{a} We're dealing with a whole new level of evil here."
+UnityChanA "I Know.{c} It's hard to believe tha someone could do something...{wa 1} like this."
+UnityChanB "Good idea.{wc 1} But we need to be careful.{a} If this guy is experimenting with the supernatural, {wa 1}who knows what kind of powers he mighthave."
