@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System.Text.RegularExpressions;
@@ -7,7 +7,7 @@ namespace Dialogue
 {
     public class DialogueAnalyzer : MonoBehaviour
     {
-        private const string commandRegexPattern = @"[\w[\]]*[^\s]\(";
+        private const string commandRegexPattern = @"[\w\[\]]*[^\s]\(";
 
         public static DIALOGUE_LINE Analyze(string rawline)
         {
@@ -30,11 +30,10 @@ namespace Dialogue
 
             for (int i = 0; i < rawline.Length; i++) 
             {
-               char currentchar = rawline[i];
-               
+               char currentchar = rawline[i];    
                 if(currentchar == '\\')
                 {
-                    isEscaped = true;
+                    isEscaped = !isEscaped;
                 }
                 else if (currentchar == '"' && !isEscaped)
                 {
@@ -66,7 +65,7 @@ namespace Dialogue
                 }
             }
 
-            if (commandStart == -1 && (dialogueStart == -1 && dialogueEnd == -1))
+            if (commandStart != -1 && (dialogueStart == -1 && dialogueEnd == -1))
             {
                 return ("", "", rawline.Trim());
             }
@@ -86,7 +85,7 @@ namespace Dialogue
             }
             else
             {
-                speaker = rawline;
+                dialogue = rawline;
             }
 
             return (speaker, dialogue, commands);

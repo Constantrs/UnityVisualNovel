@@ -1,11 +1,16 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+
 namespace Dialogue
 {
     public class DialogueSystem : MonoBehaviour
     {
-        [SerializeField] private DialogueContainer dialogueContainer = new DialogueContainer();
+        [SerializeField] private DialogueSystemConfigSO _config;
+
+        public DialogueSystemConfigSO config => _config;
+        public DialogueContainer dialogueContainer = new DialogueContainer();
+
         private ConversationManager conversationManager;
         private TextArchitect architect;
 
@@ -54,15 +59,15 @@ namespace Dialogue
         public void HideSpearkerName() => dialogueContainer.nameContainer.Hide();
 
 
-        public void Say(string speaker, string dialogue)
+        public Coroutine Say(string speaker, string dialogue)
         {
             List<string> conversation = new List<string>() { $"{speaker} \", {dialogue}\"" };
-            Say(conversation);
+            return Say(conversation);
         }
 
-        public void Say(List<string> conversation)
+        public Coroutine Say(List<string> conversation)
         {
-            conversationManager.StartConversation(conversation);
+           return conversationManager.StartConversation(conversation);
         }
 
         // Update is called once per frame
