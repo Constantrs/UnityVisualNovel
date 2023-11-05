@@ -7,7 +7,7 @@ namespace AdvCharacter
     public class Character_Text : Character
     {
         // Start is called before the first frame update
-        public Character_Text(string name) : base(name)
+        public Character_Text(string name, CharacterConfigData config) : base(name, config)
         {
 
         }

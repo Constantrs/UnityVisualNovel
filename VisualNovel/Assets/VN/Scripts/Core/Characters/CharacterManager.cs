@@ -26,6 +26,27 @@ namespace AdvCharacter
             instance = this;
         }
 
+        public Character GetCharacter(string charactetName, bool createIfdostNotExist = false)
+        {
+            if(characters.ContainsKey(charactetName.ToLower())) 
+            {
+                return characters[charactetName.ToLower()];
+            }
+            else if(createIfdostNotExist)
+            {
+                return CreateCharacter(charactetName);
+            }
+
+            return null;
+        }
+
+
+        public CharacterConfigData GetCharacterConfig(string charactetName)
+        {
+            return config.GetConfig(charactetName);
+        }
+
+
         public Character CreateCharacter(string characterName)
         {
             if (characters.ContainsKey(characterName.ToLower()))
@@ -56,11 +77,11 @@ namespace AdvCharacter
 
             if(config.characterType == Character.CharacterType.Text)
             {
-                return new Character_Text(info.name);
+                return new Character_Text(info.name, config);
             }
             else if (config.characterType == Character.CharacterType.Sprite)
             {
-                return new Character_Sprite(info.name);
+                return new Character_Sprite(info.name, config);
             }
 
             return null;
