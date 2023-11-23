@@ -68,6 +68,8 @@ namespace Dialogue
                 if(line.hasDialogue)
                 {
                     yield return CoWaitForUserInput();
+
+                    CommandManager.instance.StopAllProcesses();
                 }
 
                 //yield return new WaitForSeconds(1);
@@ -96,6 +98,16 @@ namespace Dialogue
             {
                 if(command.waitForCompletion)
                 {
+                    CoroutineWrapper cw = CommandManager.instance.Exetute(command.name, command.arguments);
+                    while(!cw.isDone)
+                    {
+                        if(userPrompt)
+                        {
+                            CommandManager.instance.StopCurrentProcess();
+                            userPrompt = false;
+                        }
+                        yield return null;
+                    }
                     yield return CommandManager.instance.Exetute(command.name, command.arguments);
                 }
                 else
