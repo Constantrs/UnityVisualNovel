@@ -16,31 +16,31 @@ namespace Testing
         {
             if (Input.GetKeyDown(KeyCode.LeftArrow))
             {
-                CommandManager.instance.Exetute("moveCharTest", "left");
+                Commands.CommandManager.instance.Exetute("moveCharTest", "left");
             }
             else if (Input.GetKeyDown(KeyCode.RightArrow))
             {
-                CommandManager.instance.Exetute("moveCharTest", "right");
+                Commands.CommandManager.instance.Exetute("moveCharTest", "right");
             }
             else if (Input.GetKeyDown(KeyCode.W))
             {
-                CommandManager.instance.Exetute("flipCharTest");
+                Commands.CommandManager.instance.Exetute("flipCharTest");
             }
         }
 
         IEnumerator CoRunning()
         {
-            yield return CommandManager.instance.Exetute("print");
-            yield return CommandManager.instance.Exetute("print_lp", "Hello World");
-            yield return CommandManager.instance.Exetute("print_mp", "Line1", "Line2", "Line3");
+            yield return Commands.CommandManager.instance.Exetute("print");
+            yield return Commands.CommandManager.instance.Exetute("print_lp", "Hello World");
+            yield return Commands.CommandManager.instance.Exetute("print_mp", "Line1", "Line2", "Line3");
 
-            yield return CommandManager.instance.Exetute("lambda");
-            yield return CommandManager.instance.Exetute("lambda_lp", "Hello Lambda");
-            yield return CommandManager.instance.Exetute("lambda_mp", "Lambda1", "Lambda2", "Lambda3");
+            yield return Commands.CommandManager.instance.Exetute("lambda");
+            yield return Commands.CommandManager.instance.Exetute("lambda_lp", "Hello Lambda");
+            yield return Commands.CommandManager.instance.Exetute("lambda_mp", "Lambda1", "Lambda2", "Lambda3");
 
-            yield return CommandManager.instance.Exetute("process");
-            yield return CommandManager.instance.Exetute("process_lp", "3");
-            yield return CommandManager.instance.Exetute("process_mp", "Process1", "Process2", "Process3");
+            yield return Commands.CommandManager.instance.Exetute("process");
+            yield return Commands.CommandManager.instance.Exetute("process_lp", "3");
+            yield return Commands.CommandManager.instance.Exetute("process_mp", "Process1", "Process2", "Process3");
         }
     }
 }

@@ -4,6 +4,8 @@ using UnityEngine;
 
 namespace Dialogue
 {
+    using Commands;
+
     public class ConversationManager
     {
         public DialogueSystem dialogueSystem => DialogueSystem.instance;
@@ -15,7 +17,6 @@ namespace Dialogue
         private TextArchitect architect = null;
 
         private bool userPrompt = false;
-
 
         public ConversationManager(TextArchitect architect)
         {
@@ -96,7 +97,7 @@ namespace Dialogue
 
             foreach (COMMAND_DATA.Command command in commands)
             {
-                if(command.waitForCompletion)
+                if(command.waitForCompletion || command.name == "wait")
                 {
                     CoroutineWrapper cw = CommandManager.instance.Exetute(command.name, command.arguments);
                     while(!cw.isDone)
