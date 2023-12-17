@@ -4,8 +4,33 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Xml.Serialization;
 using System.Xml;
-using Unity.VisualScripting;
+using Cysharp.Threading.Tasks;
+using System.Threading;
 
+
+public class ObjectManager
+{
+    private Dictionary<string, GameObject> _objDB = new Dictionary<string, GameObject>();
+
+    public void SetObjecets(GameObject obj)
+    {
+        Transform[] Children = obj.GetComponentsInChildren<Transform>();
+
+        foreach (Transform child in Children) 
+        {
+            _objDB.Add(child.name, child.gameObject);
+        }
+    }
+
+    public GameObject GetObject(string name)
+    {
+        if (_objDB.ContainsKey(name))
+        {
+            return _objDB[name];
+        }
+        return null;
+    }
+}
 
 public abstract class CommandExtension
 {
@@ -15,12 +40,15 @@ public abstract class CommandExtension
     }
 
     public abstract string PrintDebugInfo();
+
+    public abstract UniTask Execute(PlayerLoopTiming timing, CancellationToken taken);
 }
 
 public class CommandExtension_MoveCharacter : CommandExtension
 {
-    private Vector3 startPos;
-    private Vector3 endPos;
+    private Transform target = null;
+    private Vector3 startPos = Vector3.zero;
+    private Vector3 endPos = Vector3.zero;
 
     new public static CommandExtension CreateCommand(object[] param)
     {
@@ -34,14 +62,39 @@ public class CommandExtension_MoveCharacter : CommandExtension
     }
     public CommandExtension_MoveCharacter(object[] param)
     {
-        startPos = (Vector3)param[0];
-        endPos = (Vector3)param[1];
+        if (CommandTest.instance != null)
+        {
+            string name = (string)param[0];
+            target = CommandTest.instance.GetManager().GetObject(name).GetComponent<Transform>();
+        }
+        startPos = (Vector3)param[1];
+        endPos = (Vector3)param[2];
     }
 
     public override string PrintDebugInfo() 
     {
         string message = string.Format("startPos: {0} endPos: {1}", startPos, endPos);
         return message;
+    }
+
+    public async override UniTask Execute(PlayerLoopTiming inTiming, CancellationToken token)
+    {
+        Debug.Log("MoveCharacter Start");
+        float timer = 0.0f;
+        float totalTime = 300.0f;
+        while (timer < totalTime)
+        {
+            var manager = UniTaskTest.instance;
+            if (manager == null)
+            {
+                return;
+            }
+
+            target.position = Vector3.Lerp(startPos, endPos, timer / totalTime);
+            timer += manager.GetTimeScale();
+            await UniTask.Yield(timing: inTiming, cancellationToken: token);
+        }
+        Debug.Log("MoveCharacter End");
     }
 }
 
@@ -72,8 +125,46 @@ public class CommandExtension_TalkMessage : CommandExtension
         string message = string.Format("speakerID: {0} messageID: {1}", spearkerId, messageId);
         return message;
     }
+
+    public async override UniTask Execute(PlayerLoopTiming timing, CancellationToken taken)
+    {
+        Debug.Log("TalkMessage Start");
+        await UniTask.Delay(1000, delayTiming: timing, cancellationToken: taken);
+        Debug.Log("TalkMessage End");
+    }
 }
 
+public class CommandProcess
+{
+    private CancellationTokenSource _cts;
+    private PlayerLoopTiming _timing;
+    private CommandExtension _command;
+
+    public CommandProcess(CommandExtension command, PlayerLoopTiming timing = PlayerLoopTiming.Update)
+    {
+        _cts = new CancellationTokenSource();
+        _timing = timing;
+        _command = command;
+    }
+
+    public async UniTask Process()
+    {
+        try
+        {
+            await _command.Execute(_timing, _cts.Token);
+        }
+        catch (OperationCanceledException e)
+        {
+            Debug.Log(" UniTaskYieldProcess has been cancel!");
+        }
+    }
+
+    public void StopProcess()
+    {
+        _cts.Cancel();
+        _cts.Dispose();
+    }
+}
 
 [System.Serializable, XmlRoot("CommandRoot"), XmlInclude(typeof(Command))]
 public class XmlScriptData
@@ -159,15 +250,53 @@ public static void Serialize<T>(string filename, T data)
 
 public class CommandTest : MonoBehaviour
 {
+    public static CommandTest instance { get; private set; }
+
+    public GameObject objRoot;
+
     private Dictionary<string, Func<object[], CommandExtension>> commandDatabase = new Dictionary<string, Func<object[], CommandExtension>>();
+
+    private List<CommandProcess> commandProcesses = new List<CommandProcess>();
+
+    private ObjectManager objectManager = new ObjectManager();
+
+    private void Awake()
+    {
+        if (instance == null)
+        {
+            instance = this;
+        }
+
+        BuildMethod();
+
+        objectManager.SetObjecets(objRoot);
+    }
 
     private void Start()
     {
-        BuildMethod();
-
         //SaveXmlData();
 
-        LoadXmlData();
+        //LoadXmlData();
+
+        ExecuteCommand();
+
+        if (commandProcesses.Count > 0)
+        {
+            UpdateMainLoop().Forget();
+        }
+    }
+
+    private void OnDestroy()
+    {
+        if (instance == this)
+        {
+            instance = null;
+        }
+    }
+
+    public ObjectManager GetManager()
+    {
+        return objectManager;
     }
 
     private void BuildMethod()
@@ -199,6 +328,36 @@ public class CommandTest : MonoBehaviour
         }
     }
 
+    private void ExecuteCommand()
+    {
+        XmlScriptData data = XmlExtension.Deserialize<XmlScriptData>("TestXml.xml");
+
+        foreach (XmlScriptData.Command command in data.commands)
+        {
+            if (commandDatabase.ContainsKey(command.name))
+            {
+                CommandProcess process = new CommandProcess(commandDatabase[command.name]?.Invoke(command.arguments));
+                commandProcesses.Add(process);
+                Debug.Log($"Add Process {command.name}");
+            }
+        }
+    }
+
+    public async UniTask UpdateMainLoop()
+    {
+        Debug.Log("Task Start");
+
+        List<UniTask> tasks = new List<UniTask>();
+        foreach (var process in commandProcesses) 
+        {
+            tasks.Add(process.Process());
+        }
+
+        await UniTask.WhenAll(tasks.ToArray());
+
+        Debug.Log("Task End");
+    }
+
     private static XmlScriptData GetSampleData()
     {
         XmlScriptData data = new XmlScriptData();
@@ -208,20 +367,16 @@ public class CommandTest : MonoBehaviour
         cmd011.groupId = 1;
 
         {
-            //XmlScriptData.CommandArgument argument1101 = new XmlScriptData.CommandArgument();
             string strValue = "asd";
             cmd011.arguments = new object[] { strValue };
-            //cmd011.arguments.Add(argument1101);
         }
 
         XmlScriptData.Command cmd012 = new XmlScriptData.Command();
         cmd012.name = "playEff";
         cmd012.groupId = 1;
         {
-            //XmlScriptData.CommandArgument argument1201 = new XmlScriptData.CommandArgument();
             int value = 3;
             cmd012.arguments = new object[] { value };
-            //cmd012.arguments.Add(argument1201);
         }
 
         XmlScriptData.Command cmd013 = new XmlScriptData.Command();
@@ -229,17 +384,10 @@ public class CommandTest : MonoBehaviour
         cmd013.groupId = 1;
 
         {
-            //XmlScriptData.CommandArgument argument1301 = new XmlScriptData.CommandArgument();
-            Vector3 valueX = new Vector3(0.0f, 1.0f, 0.0f);
-            //argument1301.value = valueX;
-            cmd013.arguments = new object[] { valueX };
-            //XmlScriptData.CommandArgument argument1302 = new XmlScriptData.CommandArgument();
-            Vector3 valueY = new Vector3(0.0f, -1.0f, 0.0f);
-            //argument1302.value = valueY;
-            cmd013.arguments = new object[] { valueX, valueY };
-
-            //cmd013.arguments.Add(argument1301);
-            //cmd013.arguments.Add(argument1302);
+            string targetname = "Cube";
+            Vector3 valueX = new Vector3(-2.0f, 0.0f, 0.0f);
+            Vector3 valueY = new Vector3(-2.0f, 3.0f, 0.0f);
+            cmd013.arguments = new object[] { targetname, valueX, valueY };
         }
 
         data.commands.Add(cmd011);
@@ -255,23 +403,12 @@ public class CommandTest : MonoBehaviour
         cmd022.groupId = 2;
 
         {
-            //XmlScriptData.CommandArgument argument2201 = new XmlScriptData.CommandArgument();
             int valueA = 6;
-            //argument2201.value = valueA;
-
-            //XmlScriptData.CommandArgument argument2202 = new XmlScriptData.CommandArgument();
             int valueB = 7;
-            //argument2202.value = valueB;
 
             cmd022.arguments = new object[] { valueA, valueB };
-
-            //cmd022.arguments.Add(argument2201);
-            //cmd022.arguments.Add(argument2202);
         }
 
-        data.commands.Add(cmd011);
-        data.commands.Add(cmd012);
-        data.commands.Add(cmd013);
         data.commands.Add(cmd021);
         data.commands.Add(cmd022);
         return data;
