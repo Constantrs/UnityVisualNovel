@@ -8,39 +8,6 @@ using System.Threading;
 using UnityEngine;
 
 
-public abstract class CommandExtension
-{
-    public static void Extend(CommandDB database)
-    {
-
-    }
-}
-
-public class CommandExtension_Example : CommandExtension
-{
-    new public static void Extend(CommandDB database)
-    {
-        // Add action with no parameters
-        database.AddCommand("print", new Action(PrintDefaultMessage));
-
-        database.AddCommand("process", new Func<UniTask>(DefaultProcess));
-    }
-
-    private static void PrintDefaultMessage()
-    {
-        Debug.Log("DebugInfo");
-    }
-
-    private static async UniTask DefaultProcess()
-    {
-        for (int i = 1; i <= 5; i++)
-        {
-            Debug.Log($"Process Running... [{i}]");
-            await UniTask.Yield();
-        }
-    }
-}
-
 public class CommandDB
 {
     private Dictionary<string, Delegate> database = new Dictionary<string, Delegate>();
@@ -109,7 +76,6 @@ public class DelegateTest : MonoBehaviour
     private CommandDB database;
 
     //private List<CommandProcess> activeProcess = new List<CommandProcess>();
-
     private void Awake()
     {
         if (instance == null)
@@ -117,14 +83,14 @@ public class DelegateTest : MonoBehaviour
             instance = this;
             database = new CommandDB();
 
-            Assembly assembly = typeof(DelegateTest).Assembly;
-            Type[] extensionType = assembly.GetTypes().Where(t => t.IsSubclassOf(typeof(CommandExtension))).ToArray();
+            //Assembly assembly = typeof(DelegateTest).Assembly;
+            //Type[] extensionType = assembly.GetTypes().Where(t => t.IsSubclassOf(typeof(CommandExtension))).ToArray();
 
-            foreach (Type extension in extensionType)
-            {
-                MethodInfo extendMethod = extension.GetMethod("Extend");
-                extendMethod.Invoke(instance, new object[] { database });
-            }
+            //foreach (Type extension in extensionType)
+            //{
+            //    MethodInfo extendMethod = extension.GetMethod("Extend");
+            //    extendMethod.Invoke(instance, new object[] { database });
+            //}
         }
         else
         {
